@@ -2,15 +2,12 @@ import './App.css';
 import {useEffect, useState} from "react";
 import Cookies from 'js-cookie';
 import {
-    Button,
-    Card,
-    CardContent,
     createTheme,
     CssBaseline,
     Grid,
     InputAdornment,
     TextField,
-    ThemeProvider
+    ThemeProvider, Typography
 } from "@mui/material";
 import Restaurant from "./components/Restaurant/Restaurant";
 import {Search} from "@mui/icons-material";
@@ -56,7 +53,7 @@ function App() {
             .catch(console.error);
 
         return () => isSubscribed = false;
-    }, [data])
+    }, [])
 
     const modifyHiddenList = (item, type) => {
         let existingValues = (Cookies.get('myCookie') || '').split(',');
@@ -117,7 +114,6 @@ function App() {
         })
     };
 
-
     return (
         <ThemeProvider theme={theme}>
             <CssBaseline/>
@@ -130,7 +126,7 @@ function App() {
                         <TextField
                             fullWidth
                             spacing={2}
-                            label="Vad söker du idag"
+                            label="Vad vill du äta idag?"
                             variant="outlined"
                             value={inputValue}
                             onChange={handleInputChange}
@@ -138,17 +134,17 @@ function App() {
                                 style: {backgroundColor: '#FFFFFF'},
                                 endAdornment: (
                                     <InputAdornment position="end">
-                                            <Search/>
+                                        <Search/>
                                     </InputAdornment>
                                 )
                             }}
                         />
                     </Grid>
 
-                    {data.shown.map((restaurant, index) => (
-                        <>
+                    {data.shown
+                        .filter(restaurant => restaurant.dishes.length > 0)
+                        .map((restaurant, index) => (
                             <Grid
-                                hidden={restaurant.dishes.length===0}
                                 item
                                 key={index}
                                 xs={12}
@@ -159,28 +155,30 @@ function App() {
                                     onClick={() => modifyHiddenList(restaurant, 'add')}
                                 />
                             </Grid>
-                        </>
-                    ))}
+
+                        ))}
+
                 </Grid>
                 {data.hidden.length && (
+                    <div>
+
+                        {data.hidden.map((item, index) => (
+
+                            <Typography
+                                key={index}
+                                variant="body2"
+                                color="textSecondary"
+                                style={{textDecoration: "line-through",
+                                    cursor: "pointer", marginRight: "16px",
+                                    display: "inline-block"}}
+                                onClick={() => modifyHiddenList(item, 'remove')}
+                            >
+                                {item.name}
+                            </Typography>
 
 
-                    <Card>
-                        <CardContent>
-                            <Grid container spacing={2}>
-                                {data.hidden.map((item, index) => (
-                                    <Grid item key={index}>
-                                        <Button onClick={() => modifyHiddenList(item, 'remove')}
-                                                variant="contained" color="primary">
-                                            {item.name}
-                                        </Button>
-                                    </Grid>
-                                ))}
-                            </Grid>
-                        </CardContent>
-                    </Card>
-
-
+                        ))}
+                    </div>
                 )}
             </div>
         </ThemeProvider>
