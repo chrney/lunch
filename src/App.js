@@ -5,11 +5,10 @@ import { styled, alpha } from '@mui/material/styles';
 
 import {
     AppBar,
+    Button,
     createTheme,
     CssBaseline,
     Grid,
-    InputAdornment,
-    TextField,
     ThemeProvider,
     Toolbar,
     Typography
@@ -81,31 +80,34 @@ function App() {
     });
 
     const [data, setData] = useState({'shown': [], 'hidden': []})
+
+    const fetchData = async (day, isSubscribed) => {
+        const response = await fetch('https://ywfeegbtpnxdvkzxywrx.supabase.co/storage/v1/object/public/lunch/lunch.json');
+        let json = await response.json();
+        // set state with the result if `isSubscribed` is true
+        json = json[day]
+        if (isSubscribed) {
+            const existingValues = (Cookies.get('myCookie') || '').split(',');
+            let segmentedList = {...data};
+            json.list.forEach(restaurant => {
+                let key = existingValues.includes(restaurant.id) ? 'hidden' : 'shown'
+                if (!segmentedList[key]) {
+                    segmentedList[key] = []
+                }
+                segmentedList[key].push(restaurant)
+            })
+            setData(segmentedList);
+        }
+    }
     useEffect(() => {
         let isSubscribed = true;
-        const fetchData = async () => {
-            const response = await fetch('https://ywfeegbtpnxdvkzxywrx.supabase.co/storage/v1/object/public/lunch/lunch.json');
-            let json = await response.json();
-            // set state with the result if `isSubscribed` is true
-            if (isSubscribed) {
-                const existingValues = (Cookies.get('myCookie') || '').split(',');
-                let segmentedList = {...data};
-                json.forEach(restaurant => {
-                    let key = existingValues.includes(restaurant.id) ? 'hidden' : 'shown'
-                    if (!segmentedList[key]) {
-                        segmentedList[key] = []
-                    }
-                    segmentedList[key].push(restaurant)
-                })
-                setData(segmentedList);
-            }
-        }
 
-        fetchData()
+        fetchData(0, isSubscribed)
             .catch(console.error);
 
         return () => isSubscribed = false;
     }, [])
+
 
     const modifyHiddenList = (item, type) => {
         let existingValues = (Cookies.get('myCookie') || '').split(',');
@@ -173,10 +175,7 @@ function App() {
                             onChange={handleInputChange}
                         />
                     </SearchComponent>
-
-
-
-
+                    {/*<Button onClick={() => fetchData(1)}>Imorgon</Button>*/}
                 </Toolbar>
             </AppBar>
             <div className="App">
@@ -230,7 +229,6 @@ function App() {
                 )}
             </div>
         </ThemeProvider>
-
     );
 }
 
