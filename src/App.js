@@ -1,16 +1,70 @@
 import './App.css';
 import {useEffect, useState} from "react";
 import Cookies from 'js-cookie';
+import { styled, alpha } from '@mui/material/styles';
+
 import {
+    AppBar,
     createTheme,
     CssBaseline,
     Grid,
     InputAdornment,
     TextField,
-    ThemeProvider, Typography
+    ThemeProvider,
+    Toolbar,
+    Typography
 } from "@mui/material";
 import Restaurant from "./components/Restaurant/Restaurant";
-import {Search} from "@mui/icons-material";
+import {
+    Search,
+    Restaurant as RestaurantIcon
+} from "@mui/icons-material";
+import InputBase from '@mui/material/InputBase';
+
+
+const SearchComponent = styled('div')(({ theme }) => ({
+    position: 'relative',
+    borderRadius: theme.shape.borderRadius,
+    backgroundColor: alpha(theme.palette.common.white, 0.15),
+    '&:hover': {
+        backgroundColor: alpha(theme.palette.common.white, 0.25),
+    },
+    marginLeft: 0,
+    width: '100%',
+    [theme.breakpoints.up('sm')]: {
+        marginLeft: theme.spacing(1),
+        width: 'auto',
+    },
+}));
+
+const SearchIconWrapper = styled('div')(({ theme }) => ({
+    padding: theme.spacing(0, 2),
+    height: '100%',
+    position: 'absolute',
+    pointerEvents: 'none',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+}));
+
+const StyledInputBase = styled(InputBase)(({ theme }) => ({
+    color: 'inherit',
+    '& .MuiInputBase-input': {
+        padding: theme.spacing(1, 1, 1, 0),
+        // vertical padding + font size from searchIcon
+        paddingLeft: `calc(1em + ${theme.spacing(4)})`,
+        transition: theme.transitions.create('width'),
+        width: '100%',
+        [theme.breakpoints.up('sm')]: {
+            width: '12ch',
+            '&:focus': {
+                width: '20ch',
+            },
+        },
+    },
+}));
+
+
 
 function App() {
 
@@ -26,9 +80,7 @@ function App() {
         },
     });
 
-
     const [data, setData] = useState({'shown': [], 'hidden': []})
-
     useEffect(() => {
         let isSubscribed = true;
         const fetchData = async () => {
@@ -101,48 +153,45 @@ function App() {
 
     const handleInputChange = (event) => {
         setInputValue(event.target.value);
-        let copy = {...data}
-        copy.shown.map(restaurant => {
-            restaurant.dishes = restaurant.dishes.filter(dish => {
-                return !!(
-                    dish.title.toUpperCase().includes(event.target.value.toUpperCase())
-                    ||
-                    dish.text.toUpperCase().includes(event.target.value.toUpperCase())
-                )
-            })
-            return restaurant
-        })
+
     };
 
     return (
         <ThemeProvider theme={theme}>
             <CssBaseline/>
+            <AppBar position="sticky">
+                <Toolbar>
+                    <RestaurantIcon sx={{mr: 1}}/>
+                    <SearchComponent sx={{mr: 2}}>
+                        <SearchIconWrapper>
+                            <Search />
+                        </SearchIconWrapper>
+                        <StyledInputBase
+                            placeholder="Sök maträtt"
+                            inputProps={{ 'aria-label': 'search' }}
+                            value={inputValue}
+                            onChange={handleInputChange}
+                        />
+                    </SearchComponent>
 
+
+
+
+                </Toolbar>
+            </AppBar>
             <div className="App">
 
                 <Grid container spacing={2} sx={{px: 2, py: 2}}>
-
-                    <Grid item xs={12} md={12}>
-                        <TextField
-                            fullWidth
-                            spacing={2}
-                            label="Vad vill du äta idag?"
-                            variant="outlined"
-                            value={inputValue}
-                            onChange={handleInputChange}
-                            InputProps={{
-                                style: {backgroundColor: '#FFFFFF'},
-                                endAdornment: (
-                                    <InputAdornment position="end">
-                                        <Search/>
-                                    </InputAdornment>
-                                )
-                            }}
-                        />
-                    </Grid>
-
                     {data.shown
-                        .filter(restaurant => restaurant.dishes.length > 0)
+                        .filter(restaurant => {
+                            return restaurant.dishes.filter(dish => {
+                                return (
+                                    dish.title.toUpperCase().includes(inputValue.toUpperCase())
+                                    ||
+                                    dish.text.toUpperCase().includes(inputValue.toUpperCase())
+                                );
+                            }).length > 0
+                        })
                         .map((restaurant, index) => (
                             <Grid
                                 item
@@ -161,21 +210,20 @@ function App() {
                 </Grid>
                 {data.hidden.length && (
                     <div>
-
                         {data.hidden.map((item, index) => (
-
                             <Typography
                                 key={index}
                                 variant="body2"
                                 color="textSecondary"
-                                style={{textDecoration: "line-through",
+                                style={{
+                                    textDecoration: "line-through",
                                     cursor: "pointer", marginRight: "16px",
-                                    display: "inline-block"}}
+                                    display: "inline-block"
+                                }}
                                 onClick={() => modifyHiddenList(item, 'remove')}
                             >
                                 {item.name}
                             </Typography>
-
 
                         ))}
                     </div>

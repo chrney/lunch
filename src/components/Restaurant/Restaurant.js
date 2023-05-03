@@ -9,9 +9,9 @@ function Restaurant({restaurant, onClick}) {
 
     const displayedItems = showAll ? restaurant.dishes : restaurant.dishes.slice(0, 3);
 
-    return <Card sx={{mt: "40px"}} elevation={5}>
+    return <Card sx={{mt: "20px"}} elevation={5}>
         <CardContent>
-            <Typography variant="h5" component="h2">
+            <Typography variant="h5" component="h2" color="primary">
                 {restaurant.name}
             </Typography>
             <List>
