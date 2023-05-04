@@ -87,7 +87,7 @@ function App() {
         // set state with the result if `isSubscribed` is true
         json = json[day]
         if (isSubscribed) {
-            const existingValues = (Cookies.get('myCookie') || '').split(',');
+            const existingValues = (Cookies.get('restaurants') || '').split(',');
             let segmentedList = {...data};
             json.list.forEach(restaurant => {
                 let key = existingValues.includes(restaurant.id) ? 'hidden' : 'shown'
@@ -110,7 +110,7 @@ function App() {
 
 
     const modifyHiddenList = (item, type) => {
-        let existingValues = (Cookies.get('myCookie') || '').split(',');
+        let existingValues = (Cookies.get('restaurants') || '').split(',');
         let copy = {...data}
         switch (type) {
             case 'add':
@@ -129,7 +129,7 @@ function App() {
                 })
                 copy.shown.push(item)
         }
-        Cookies.set('myCookie', existingValues.join(','))
+        Cookies.set('restaurants', existingValues.join(','), { expires: 360 })
         setData(sortRestaurants(copy))
 //        window.scrollTo(0, 0);
     }
