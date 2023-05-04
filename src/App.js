@@ -182,8 +182,6 @@ function App() {
                     onClick={() => toggleDay()
                     }>Visa lunch för {
                     getTomorrow === 1 ? 'idag' : 'imorgon'}</Button>
-
-
                 <Grid container spacing={2} sx={{px: 2, py: 2}}>
                     <Grid item xs={6}>
                         <Typography variant="h6" component="h6" sx={{mt: 2}}>
