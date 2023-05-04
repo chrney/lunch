@@ -1,27 +1,15 @@
 import './App.css';
 import {useEffect, useState} from "react";
 import Cookies from 'js-cookie';
-import { styled, alpha } from '@mui/material/styles';
+import {alpha, styled} from '@mui/material/styles';
 
-import {
-    AppBar,
-    Button,
-    createTheme,
-    CssBaseline,
-    Grid,
-    ThemeProvider,
-    Toolbar,
-    Typography
-} from "@mui/material";
+import {AppBar, Button, createTheme, CssBaseline, Grid, ThemeProvider, Toolbar, Typography} from "@mui/material";
 import Restaurant from "./components/Restaurant/Restaurant";
-import {
-    Search,
-    Restaurant as RestaurantIcon
-} from "@mui/icons-material";
+import {Restaurant as RestaurantIcon, Search} from "@mui/icons-material";
 import InputBase from '@mui/material/InputBase';
 
 
-const SearchComponent = styled('div')(({ theme }) => ({
+const SearchComponent = styled('div')(({theme}) => ({
     position: 'relative',
     borderRadius: theme.shape.borderRadius,
     backgroundColor: alpha(theme.palette.common.white, 0.15),
@@ -36,7 +24,7 @@ const SearchComponent = styled('div')(({ theme }) => ({
     },
 }));
 
-const SearchIconWrapper = styled('div')(({ theme }) => ({
+const SearchIconWrapper = styled('div')(({theme}) => ({
     padding: theme.spacing(0, 2),
     height: '100%',
     position: 'absolute',
@@ -46,7 +34,7 @@ const SearchIconWrapper = styled('div')(({ theme }) => ({
     justifyContent: 'center',
 }));
 
-const StyledInputBase = styled(InputBase)(({ theme }) => ({
+const StyledInputBase = styled(InputBase)(({theme}) => ({
     color: 'inherit',
     '& .MuiInputBase-input': {
         padding: theme.spacing(1, 1, 1, 0),
@@ -55,14 +43,13 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
         transition: theme.transitions.create('width'),
         width: '100%',
         [theme.breakpoints.up('sm')]: {
-            width: '12ch',
+            width: "12ch",
             '&:focus': {
                 width: '20ch',
             },
         },
     },
 }));
-
 
 
 function App() {
@@ -79,25 +66,35 @@ function App() {
         },
     });
 
+    const [getTomorrow, setTomorrow] = useState(0)
+    const [shownDate, setShownDate] = useState('')
+    const toggleDay = () => {
+        let newVal = getTomorrow === 0 ? 1 : 0
+        setTomorrow(newVal)
+        console.log(newVal)
+        fetchData(newVal, true)
+    }
+
     const [data, setData] = useState({'shown': [], 'hidden': []})
 
-    const fetchData = async (day, isSubscribed) => {
+    const fetchData = async (day, isSubscribedInFn) => {
         const response = await fetch('https://ywfeegbtpnxdvkzxywrx.supabase.co/storage/v1/object/public/lunch/lunch.json');
         let json = await response.json();
         // set state with the result if `isSubscribed` is true
-        json = json[day]
-        if (isSubscribed) {
-            const existingValues = (Cookies.get('restaurants') || '').split(',');
-            let segmentedList = {...data};
-            json.list.forEach(restaurant => {
-                let key = existingValues.includes(restaurant.id) ? 'hidden' : 'shown'
-                if (!segmentedList[key]) {
-                    segmentedList[key] = []
-                }
-                segmentedList[key].push(restaurant)
-            })
-            setData(segmentedList);
-        }
+        //if (isSubscribedInFn) {
+        setShownDate(json[day].day)
+        const existingValues = (Cookies.get('restaurants') || '').split(',');
+        let segmentedList = {'hidden': [], 'shown': []};
+        json[day].list.forEach(restaurant => {
+            let key = existingValues.includes(restaurant.id) ? 'hidden' : 'shown'
+            if (!segmentedList[key]) {
+                segmentedList[key] = []
+            }
+            segmentedList[key].push(restaurant)
+        })
+        console.log(segmentedList)
+        setData(segmentedList);
+        // }
     }
     useEffect(() => {
         let isSubscribed = true;
@@ -129,7 +126,7 @@ function App() {
                 })
                 copy.shown.push(item)
         }
-        Cookies.set('restaurants', existingValues.join(','), { expires: 360 })
+        Cookies.set('restaurants', existingValues.join(','), {expires: 360})
         setData(sortRestaurants(copy))
 //        window.scrollTo(0, 0);
     }
@@ -166,21 +163,38 @@ function App() {
                     <RestaurantIcon sx={{mr: 1}}/>
                     <SearchComponent sx={{mr: 2}}>
                         <SearchIconWrapper>
-                            <Search />
+                            <Search/>
                         </SearchIconWrapper>
                         <StyledInputBase
                             placeholder="Sök maträtt"
-                            inputProps={{ 'aria-label': 'search' }}
+                            inputProps={{'aria-label': 'search'}}
                             value={inputValue}
                             onChange={handleInputChange}
                         />
                     </SearchComponent>
-                    {/*<Button onClick={() => fetchData(1)}>Imorgon</Button>*/}
                 </Toolbar>
             </AppBar>
             <div className="App">
+                <Button
+                    variant="contained"
+                    color="primary"
+                    sx={{mt: 2}}
+                    onClick={() => toggleDay()
+                    }>Visa lunch för {
+                    getTomorrow === 1 ? 'idag' : 'imorgon'}</Button>
+
 
                 <Grid container spacing={2} sx={{px: 2, py: 2}}>
+                    <Grid item xs={6}>
+                        <Typography variant="h6" component="h6" sx={{mt: 2}}>
+                            Dagens lunch
+                        </Typography>
+                    </Grid>
+                    <Grid item xs={6}>
+                        <Typography variant="h6" component="h6" sx={{mt: 2}}>
+                            {shownDate}
+                        </Typography>
+                    </Grid>
                     {data.shown
                         .filter(restaurant => {
                             return restaurant.dishes.filter(dish => {
@@ -199,6 +213,7 @@ function App() {
                                 md={4}
                             >
                                 <Restaurant
+                                    searchTerm={inputValue.toUpperCase()}
                                     restaurant={restaurant}
                                     onClick={() => modifyHiddenList(restaurant, 'add')}
                                 />
