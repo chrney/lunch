@@ -2,12 +2,10 @@ import './App.css';
 import {useEffect, useState} from "react";
 import Cookies from 'js-cookie';
 import {alpha, styled} from '@mui/material/styles';
-
 import {AppBar, Button, createTheme, CssBaseline, Grid, ThemeProvider, Toolbar, Typography} from "@mui/material";
 import Restaurant from "./components/Restaurant/Restaurant";
 import {Restaurant as RestaurantIcon, Search} from "@mui/icons-material";
 import InputBase from '@mui/material/InputBase';
-
 
 const SearchComponent = styled('div')(({theme}) => ({
     position: 'relative',
@@ -77,11 +75,9 @@ function App() {
 
     const [data, setData] = useState({'shown': [], 'hidden': []})
 
-    const fetchData = async (day, isSubscribedInFn) => {
+    const fetchData = async (day) => {
         const response = await fetch('https://ywfeegbtpnxdvkzxywrx.supabase.co/storage/v1/object/public/lunch/lunch.json');
         let json = await response.json();
-        // set state with the result if `isSubscribed` is true
-        //if (isSubscribedInFn) {
         setShownDate(json[day].day)
         const existingValues = (Cookies.get('restaurants') || '').split(',');
         let segmentedList = {'hidden': [], 'shown': []};
@@ -97,14 +93,9 @@ function App() {
         // }
     }
     useEffect(() => {
-        let isSubscribed = true;
-
-        fetchData(0, isSubscribed)
+        fetchData(0)
             .catch(console.error);
-
-        return () => isSubscribed = false;
-    }, [])
-
+        }, [])
 
     const modifyHiddenList = (item, type) => {
         let existingValues = (Cookies.get('restaurants') || '').split(',');

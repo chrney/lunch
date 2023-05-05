@@ -1,5 +1,5 @@
 import {forwardRef, useState} from "react";
-import {Box, Button, Card, CardContent, IconButton, List, Typography} from "@mui/material";
+import {Box, Button, Card, CardContent, List, Typography} from "@mui/material";
 import CardActions from "@mui/material/CardActions";
 import DishItem from "../DishItem/DishItem";
 import {ContentCopy, VisibilityOff} from "@mui/icons-material";
