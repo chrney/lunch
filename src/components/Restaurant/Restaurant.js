@@ -1,5 +1,5 @@
 import {forwardRef, useState} from "react";
-import {Box, Button, Card, CardContent, List, Typography} from "@mui/material";
+import {Box, Button, Card, CardContent, CardHeader, List} from "@mui/material";
 import CardActions from "@mui/material/CardActions";
 import DishItem from "../DishItem/DishItem";
 import {ContentCopy, VisibilityOff} from "@mui/icons-material";
@@ -16,7 +16,6 @@ function Restaurant({restaurant, onClick, searchTerm}) {
     const [open, setOpen] = useState(false);
 
     const handleCopy = () => {
-        console.log('here')
         setOpen(true);
     };
 
@@ -49,10 +48,8 @@ function Restaurant({restaurant, onClick, searchTerm}) {
             </Alert>
         </Snackbar>
         <Card sx={{mt: "20px"}} elevation={5}>
+            <CardHeader title={restaurant.name}/>
             <CardContent>
-                <Typography variant="h5" component="h2" color="primary">
-                    {restaurant.name}
-                </Typography>
                 <List>
                     {
                         restaurant.dishes.filter(dish => {
@@ -69,9 +66,13 @@ function Restaurant({restaurant, onClick, searchTerm}) {
             </CardContent>
             <CardActions>
                 <Box display="flex" justifyContent="space-between" width="100%">
-                    <CopyToClipboard text={generateText(restaurant)} onCopy={handleCopy}>
+                    <CopyToClipboard
+                        options={{format: 'text/html'}}
+                        text={generateText(restaurant)}
+                        onCopy={handleCopy}
+                    >
                         <Button color="primary">
-                            <ContentCopy sx={{mr: 1}} />Kopiera
+                            <ContentCopy sx={{mr: 1}}/>Kopiera
                         </Button>
                     </CopyToClipboard>
                     <Button color="primary" onClick={onClick}>
